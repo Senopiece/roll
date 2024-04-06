@@ -1,6 +1,3 @@
-from typing import List
-
-
 def add(a: int, b: int):
     return (a + b) % M
 
