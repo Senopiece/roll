@@ -1,35 +1,10 @@
 from typing import List
 
+from cyclic import cadd, cmul
+
 
 def add(a: int, b: int):
     return (a + b) % M
-
-
-def cadd(a: int, b: int):
-    """
-    Perform addition with end-around carry on two integers within a fixed bit length.
-    """
-    bit_length = S
-    modulus = 1 << bit_length
-
-    # trim to ensure a and b are fittable in modulus
-    # a %= modulus aka assert a < modulus
-    # b %= modulus aka assert b < modulus
-
-    raw = a + b
-    carry = (
-        raw >> bit_length
-    )  # because of a and b are trimmed, we can be sure that carry can be only 0/1
-    return (raw + carry) % modulus
-
-
-def cmul(a: int, b: int):
-    res = 0
-    for bit in bin(a)[2:]:
-        res = cadd(res, res)
-        if bit == "1":
-            res = cadd(res, b)
-    return res
 
 
 def mul(a: int, b: int):
@@ -43,7 +18,7 @@ def P_add_a(a: int):
 
 # best period: M (if P is not 0)
 def c_P_add_a(a: int):
-    return cadd(P, a)
+    return cadd(P, a, S)
 
 
 # best period: M (if P is mutual prime to M and is not 0)
@@ -53,9 +28,10 @@ def P_mul_a(a: int):
 
 # best period: M^2 (if P is not 0 - ya just not a 0 wow!)
 def c_P_mul_a(a: int):
-    return cmul(P, a)
+    return cmul(P, a, S)
 
 
+# NOTE: it gives very symmetric image, but when selecting each M'th row, the image is very random
 # best so far found period: M/2 ~ M
 def a_mul_a(a: int):
     return mul(a, a)
@@ -63,7 +39,7 @@ def a_mul_a(a: int):
 
 # best so far found period: ?
 def c_a_mul_a(a: int):
-    return cmul(a, a)
+    return cmul(a, a, S)
 
 
 # best so far found period: 0.25M ~ M
@@ -82,9 +58,9 @@ def c_P_to_a(a: int):
     # returns cyclic P^a
     res = 1
     for bit in bin(a)[2:]:
-        res = cmul(res, res)
+        res = cmul(res, res, S)
         if bit == "1":
-            res = cmul(res, P)
+            res = cmul(res, P, S)
     return res
 
 
@@ -104,18 +80,22 @@ def c_a_to_a(a: int):
     # returns cyclic a^a
     res = 1
     for bit in bin(a)[2:]:
-        res = cmul(res, res)
+        res = cmul(res, res, S)
         if bit == "1":
-            res = cmul(res, a)
+            res = cmul(res, a, S)
     return res
 
+
+# TODO: research mb if regular modulus will be replaced with cadd/cmul can it make encryption stronger so that applying for existing schemes allows to reduce the length of keys
+# TODO: research mb the if regular schemes like DH/RSA/etc being reimplemented using this cmul will cause some protection against quantum hack
+# TODO: research how hard is it to get c_P_to_a period - if it's NP hard, then it can be also used in the sign introduced in the file sign.py
 
 # just visualize
 # S = 5
 # M = 2**S
 # a = ["-"] * M
 # P = 3
-# for c in range(M * M + 4):
+# for c in range(M * M):
 #     v = c_a_mul_a(c)
 #     a = ["-"] * M
 #     a[v] = "x"
@@ -124,43 +104,40 @@ def c_a_to_a(a: int):
 # >>>>
 
 # search for the best period when P is also iterable
-best = (-1, -1, -1)
-shift = 3
-for S in range(5, 8):
-    M = 2**S
-    for P in range(1, M):
-        print(f"Searching period for (S, P) = ({S}, {P})...")
+# best = (-1, -1, -1)
+# shift = 3
+# for S in range(5, 7):
+#     M = 2**S
+#     for P in range(1, M):
+#         print(f"Searching period for (S, P) = ({S}, {P})...")
 
-        values: List[int] = []
-        found = False
-        for c in range(
-            shift, M * M + shift
-        ):  # assuming no greater than this value period can be found
-            v = c_a_mul_a(c)
-            values.append(v)
-            if (
-                len(values) % 2 == 0
-                and values[: len(values) // 2] == values[len(values) // 2 :]
-            ):
-                p = len(values) // 2
-                print(p, "that is", f"{p/M}*M,", f"M = {M}")
-                if p > best[2]:
-                    best = S, P, p
-                found = True
-                break
+#         values: List[int] = []
+#         found = False
+#         for c in range(
+#             shift, M * M + shift
+#         ):  # assuming no greater than this value period can be found
+#             v = c_P_to_a(c)
+#             values.append(v)
+#             p = len(values) // 2
+#             if len(values) % 2 == 0 and values[:p] == values[p:]:
+#                 print(p, "that is", f"{p/M}*M,", f"M = {M}")
+#                 if p > best[2]:
+#                     best = S, P, p
+#                 found = True
+#                 break
 
-        if not found:
-            print("No period found")
+#         if not found:
+#             print("No period found")
 
-if best[0] != -1:
-    S, P, p = best
-    M = 2**S
-    print(
-        f"Best found: (S, P) = ({S}, {P}) with period = {p}",
-        "that is",
-        f"{p/M}*M,",
-        f"M = {M}",
-    )
+# if best[0] != -1:
+#     S, P, p = best
+#     M = 2**S
+#     print(
+#         f"Best found: (S, P) = ({S}, {P}) with period = {p}",
+#         "that is",
+#         f"{p/M}*M,",
+#         f"M = {M}",
+#     )
 
 # >>>>
 
