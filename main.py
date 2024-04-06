@@ -1,3 +1,6 @@
+from typing import List
+
+
 def add(a: int, b: int):
     return (a + b) % M
 
@@ -48,7 +51,7 @@ def P_mul_a(a: int):
     return mul(P, a)
 
 
-# best period: M (if P is not 0 - ya just not a 0 wow!)
+# best period: M^2 (if P is not 0 - ya just not a 0 wow!)
 def c_P_mul_a(a: int):
     return cmul(P, a)
 
@@ -58,7 +61,7 @@ def a_mul_a(a: int):
     return mul(a, a)
 
 
-# best so far found period: M(M-1) ~ M^2 wow!
+# best so far found period: ?
 def c_a_mul_a(a: int):
     return cmul(a, a)
 
@@ -85,7 +88,7 @@ def c_P_to_a(a: int):
     return res
 
 
-# best so far found period: M
+# best so far found period: M, but on S > 6 didnt find yet
 def a_to_a(a: int):
     # returns a^a
     res = 1
@@ -96,7 +99,7 @@ def a_to_a(a: int):
     return res
 
 
-# best so far found period: M*(M/2) ~ M^2
+# best so far found period: ?
 def c_a_to_a(a: int):
     # returns cyclic a^a
     res = 1
@@ -108,56 +111,56 @@ def c_a_to_a(a: int):
 
 
 # just visualize
-S = 5
-M = 2**S
-a = ["-"] * M
-P = 3
-for c in range(M * M):
-    v = c_a_mul_a(c)
-    a = ["-"] * M
-    a[v] = "x"
-    print(" ".join(a), "<" if c % M == 0 else "", v)
+# S = 5
+# M = 2**S
+# a = ["-"] * M
+# P = 3
+# for c in range(M * M + 4):
+#     v = c_a_mul_a(c)
+#     a = ["-"] * M
+#     a[v] = "x"
+#     print(" ".join(a), "<" if c % M == 0 else "", v)
 
 # >>>>
 
 # search for the best period when P is also iterable
-# best = (-1, -1, -1)
-# shift = 10
-# for S in range(3, 10):
-#     M = 2**S
-#     for P in range(1, M):
-#         print(f"Searching period for (S, P) = ({S}, {P})...")
+best = (-1, -1, -1)
+shift = 3
+for S in range(5, 8):
+    M = 2**S
+    for P in range(1, M):
+        print(f"Searching period for (S, P) = ({S}, {P})...")
 
-#         values: List[int] = []
-#         found = False
-#         for c in range(
-#             shift, M * M * M * 2 + shift
-#         ):  # assuming no greater than M^3 period can be found
-#             v = c_a_to_a(c)
-#             values.append(v)
-#             if (
-#                 len(values) % 2 == 0
-#                 and values[: len(values) // 2] == values[len(values) // 2 :]
-#             ):
-#                 p = len(values) // 2
-#                 print(p, "that is", f"{p/M}*M,", f"M = {M}")
-#                 if p > best[2]:
-#                     best = S, P, p
-#                 found = True
-#                 break
+        values: List[int] = []
+        found = False
+        for c in range(
+            shift, M * M + shift
+        ):  # assuming no greater than this value period can be found
+            v = c_a_mul_a(c)
+            values.append(v)
+            if (
+                len(values) % 2 == 0
+                and values[: len(values) // 2] == values[len(values) // 2 :]
+            ):
+                p = len(values) // 2
+                print(p, "that is", f"{p/M}*M,", f"M = {M}")
+                if p > best[2]:
+                    best = S, P, p
+                found = True
+                break
 
-#         if not found:
-#             print("No period found")
+        if not found:
+            print("No period found")
 
-# if best[0] != -1:
-#     S, P, p = best
-#     M = 2**S
-#     print(
-#         f"Best found: (S, P) = ({S}, {P}) with period = {p}",
-#         "that is",
-#         f"{p/M}*M,",
-#         f"M = {M}",
-#     )
+if best[0] != -1:
+    S, P, p = best
+    M = 2**S
+    print(
+        f"Best found: (S, P) = ({S}, {P}) with period = {p}",
+        "that is",
+        f"{p/M}*M,",
+        f"M = {M}",
+    )
 
 # >>>>
 
