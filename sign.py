@@ -37,13 +37,13 @@ class G:
 #   So that multiplecative inverse cannot be used to simulate division.
 
 # h - message hash (S bits)
-# k - signer private key (S bits)
+# Gk - signer private key (S bits)
 # G2k - signer public key (S bits)
 # Gs - sign (S bits)
 
 
-def sign(h: int, k: int):
-    return G(h) * G(k)
+def sign(h: int, Gk: G):
+    return G(h) * Gk
 
 
 G2 = G(2)
@@ -56,9 +56,9 @@ def verify(h: int, Gs: G, G2k: G):
 if __name__ == "__main__":
     h = 32423532434
 
-    k = 23566623423
-    G2k = G2 * G(k)
-    Gs = sign(h, k)
+    Gk = G(324325)
+    G2k = G2 * Gk
+    Gs = sign(h, Gk)
 
     print(verify(h, Gs, G2k))
 
