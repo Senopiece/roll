@@ -75,7 +75,7 @@ def P_to_a(a: int):
     return res
 
 
-# TODO: find a way to calculate the period for this function without full enumeration
+# TODO: find a way to calculate the period for this function without full enumeration (recall how it's done in a regular case with euler's theorem)
 # best so far found period: 0.9M ~ M
 def c_P_to_a(a: int):
     # returns cyclic P^a
