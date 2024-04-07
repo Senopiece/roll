@@ -118,7 +118,7 @@ def c_a_to_a(a: int):
 # a = ["-"] * M
 # P = 3
 # for c in range(M * M):
-#     v = c_a_to_P(c)
+#     v = c_a_to_a(c)
 #     a = ["-"] * M
 #     a[v] = "x"
 #     print(" ".join(a), "<" if c % M == 0 else "", v)
@@ -138,7 +138,7 @@ for S in range(5, 8):
         for c in range(
             shift, M**M + 4 + shift
         ):  # assuming no greater than this value period can be found
-            v = c_a_to_a(c)
+            v = c_P_mul_a(c)
             values.append(v)
             p = len(values) // 2
             if len(values) % 2 == 0 and values[:p] == values[p:]:
@@ -163,7 +163,8 @@ if best[0] != -1:
 
 # >>>>
 
-# search for the best period when is not iterable
+# search for the best period when P is not iterable
+# P = 3
 # best = (-1, -1)
 # for S in range(4, 10):
 #     M = 2**S
