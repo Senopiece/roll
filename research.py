@@ -75,6 +75,7 @@ def P_to_a(a: int):
     return res
 
 
+# TODO: find a way to calculate the period for this function without full enumeration
 # best so far found period: 0.9M ~ M
 def c_P_to_a(a: int):
     # returns cyclic P^a
@@ -107,10 +108,6 @@ def c_a_to_a(a: int):
             res = cmul(res, a, S)
     return res
 
-
-# TODO: research mb if regular modulus will be replaced with cadd/cmul can it make encryption stronger so that applying for existing schemes allows to reduce the length of keys
-# TODO: research mb the if regular schemes like DH/RSA/etc being reimplemented using this cmul will cause some protection against quantum hack
-# TODO: research how hard is it to get c_P_to_a period - if it's NP hard, then it can be also used in the sign introduced in the file sign.py
 
 # just visualize
 # S = 5
