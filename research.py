@@ -37,7 +37,7 @@ def a_mul_a(a: int):
     return mul(a, a)
 
 
-# best so far found period: ?
+# best so far found period: M(M-1) ~ M^2
 def c_a_mul_a(a: int):
     return cmul(a, a, S)
 
@@ -97,7 +97,7 @@ def a_to_a(a: int):
     return res
 
 
-# best so far found period: ?
+# best so far found period: M(M/2-1) ~ M^2
 def c_a_to_a(a: int):
     # returns cyclic a^a
     res = 1
@@ -128,7 +128,7 @@ def c_a_to_a(a: int):
 # search for the best period when P is also iterable
 best = (-1, -1, -1)
 shift = 3
-for S in range(5, 7):
+for S in range(5, 8):
     M = 2**S
     for P in range(1, M):
         print(f"Searching period for (S, P) = ({S}, {P})...")
@@ -136,9 +136,9 @@ for S in range(5, 7):
         values: List[int] = []
         found = False
         for c in range(
-            shift, M * M + 2 + shift
+            shift, M**M + 4 + shift
         ):  # assuming no greater than this value period can be found
-            v = c_a_to_P(c)
+            v = c_a_to_a(c)
             values.append(v)
             p = len(values) // 2
             if len(values) % 2 == 0 and values[:p] == values[p:]:
