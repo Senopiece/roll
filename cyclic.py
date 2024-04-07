@@ -23,13 +23,24 @@ def csub(a: int, b: int, bit_length: int = 5):
 
 def cmul(a: int, b: int, bit_length: int = 5):
     res = 0
-    for bit in bin(a)[2:]:
+    for bit in bin(b)[2:]:
         res = cadd(res, res, bit_length)
         if bit == "1":
-            res = cadd(res, b, bit_length)
+            res = cadd(res, a, bit_length)
     return res
 
 
 def cdiv(a: int, b: int, bit_length: int = 5):
     period = (1 << bit_length) - 1
     return cmul(a, pow(b, -1, period))
+
+
+# TODO: find a way to find it's period (recall how it's done in a regular case with euler's theorem)
+# TODO: find ways to solve such discrete log (both quantum and classical) is it the same as regular discrete log?
+def cpow(a: int, b: int, bit_length: int = 5):
+    res = 1
+    for bit in bin(b)[2:]:
+        res = cmul(res, res, bit_length)
+        if bit == "1":
+            res = cmul(res, a, bit_length)
+    return res
