@@ -75,6 +75,7 @@ def P_to_a(a: int):
     return res
 
 
+# TODO: find ways to solve such discrete log
 # TODO: find a way to calculate the period for this function without full enumeration (recall how it's done in a regular case with euler's theorem)
 # best so far found period: 0.9M ~ M
 def c_P_to_a(a: int):
@@ -111,52 +112,52 @@ def c_a_to_a(a: int):
 
 # just visualize
 # S = 5
-# M = 2**S
-# a = ["-"] * M
-# P = 3
-# for c in range(M * M):
-#     v = c_a_to_a(c)
-#     a = ["-"] * M
-#     a[v] = "x"
-#     print(" ".join(a), "<" if c % M == 0 else "", v)
+M = 2 * 3 * 5
+a = ["-"] * M
+P = 2
+for c in range(M):
+    v = P_mul_a(c)
+    a = ["-"] * M
+    a[v] = "x"
+    print(" ".join(a), "<" if c % M == 0 else "", v)
 
 # >>>>
 
 # search for the best period when P is also iterable
-best = (-1, -1, -1)
-shift = 3
-for S in range(5, 8):
-    M = 2**S
-    for P in range(1, M):
-        print(f"Searching period for (S, P) = ({S}, {P})...")
+# best = (-1, -1, -1)
+# shift = 3
+# for S in range(5, 8):
+#     M = 2**S
+#     for P in range(1, M):
+#         print(f"Searching period for (S, P) = ({S}, {P})...")
 
-        values: List[int] = []
-        found = False
-        for c in range(
-            shift, M**M + 4 + shift
-        ):  # assuming no greater than this value period can be found
-            v = c_P_mul_a(c)
-            values.append(v)
-            p = len(values) // 2
-            if len(values) % 2 == 0 and values[:p] == values[p:]:
-                print(p, "that is", f"{p/M}*M,", f"M = {M}")
-                if p > best[2]:
-                    best = S, P, p
-                found = True
-                break
+#         values: List[int] = []
+#         found = False
+#         for c in range(
+#             shift, M**M + 4 + shift
+#         ):  # assuming no greater than this value period can be found
+#             v = c_P_mul_a(c)
+#             values.append(v)
+#             p = len(values) // 2
+#             if len(values) % 2 == 0 and values[:p] == values[p:]:
+#                 print(p, "that is", f"{p/M}*M,", f"M = {M}")
+#                 if p > best[2]:
+#                     best = S, P, p
+#                 found = True
+#                 break
 
-        if not found:
-            print("No period found")
+#         if not found:
+#             print("No period found")
 
-if best[0] != -1:
-    S, P, p = best
-    M = 2**S
-    print(
-        f"Best found: (S, P) = ({S}, {P}) with period = {p}",
-        "that is",
-        f"{p/M}*M,",
-        f"M = {M}",
-    )
+# if best[0] != -1:
+#     S, P, p = best
+#     M = 2**S
+#     print(
+#         f"Best found: (S, P) = ({S}, {P}) with period = {p}",
+#         "that is",
+#         f"{p/M}*M,",
+#         f"M = {M}",
+#     )
 
 # >>>>
 
