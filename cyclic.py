@@ -30,40 +30,6 @@ def cmul(a: int, b: int, bit_length: int = 5):
     return res
 
 
-# NOTE: does not work
-# TODO: it it even possible to make it work, mb not using the regular number approach
 def cdiv(a: int, b: int, bit_length: int = 5):
-    assert b != 0
-
-    res = [False]
-    s = 0
-    for bit in bin(a)[2:]:
-        s = cadd(s, s, bit_length)
-        s = cadd(s, 1, bit_length) if bit == "1" else s
-
-        if s >= b:
-            s = csub(s, b, bit_length)
-            res.append(True)
-        else:
-            res.append(False)
-
-    return int("".join("1" if e else "0" for e in res), base=2), s
-
-
-# NOTE: a refereence implementation on regular numbers
-# def div(a: int, b: int, bit_length: int = 5):
-#     assert b != 0
-
-#     res = [False]
-#     s = 0
-#     for bit in bin(a)[2:]:
-#         s *= 2
-#         s += 1 if bit == "1" else 0
-
-#         if s >= b:
-#             s -= b
-#             res.append(True)
-#         else:
-#             res.append(False)
-
-#     return int("".join("1" if e else "0" for e in res), base=2), s
+    period = (1 << bit_length) - 1
+    return cmul(a, pow(b, -1, period))
