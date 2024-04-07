@@ -42,6 +42,28 @@ def c_a_mul_a(a: int):
     return cmul(a, a, S)
 
 
+# best so far found period: M
+def a_to_P(a: int):
+    # returns a^P
+    res = 1
+    for bit in bin(P)[2:]:
+        res = mul(res, res)
+        if bit == "1":
+            res = mul(res, a)
+    return res
+
+
+# best so far found period: M
+def c_a_to_P(a: int):
+    # returns a^P
+    res = 1
+    for bit in bin(P)[2:]:
+        res = cmul(res, res)
+        if bit == "1":
+            res = cmul(res, a)
+    return res
+
+
 # best so far found period: 0.25M ~ M
 def P_to_a(a: int):
     # returns P^a
@@ -96,7 +118,7 @@ def c_a_to_a(a: int):
 # a = ["-"] * M
 # P = 3
 # for c in range(M * M):
-#     v = c_a_mul_a(c)
+#     v = c_a_to_P(c)
 #     a = ["-"] * M
 #     a[v] = "x"
 #     print(" ".join(a), "<" if c % M == 0 else "", v)
@@ -104,40 +126,40 @@ def c_a_to_a(a: int):
 # >>>>
 
 # search for the best period when P is also iterable
-# best = (-1, -1, -1)
-# shift = 3
-# for S in range(5, 7):
-#     M = 2**S
-#     for P in range(1, M):
-#         print(f"Searching period for (S, P) = ({S}, {P})...")
+best = (-1, -1, -1)
+shift = 3
+for S in range(5, 7):
+    M = 2**S
+    for P in range(1, M):
+        print(f"Searching period for (S, P) = ({S}, {P})...")
 
-#         values: List[int] = []
-#         found = False
-#         for c in range(
-#             shift, M * M + shift
-#         ):  # assuming no greater than this value period can be found
-#             v = c_P_to_a(c)
-#             values.append(v)
-#             p = len(values) // 2
-#             if len(values) % 2 == 0 and values[:p] == values[p:]:
-#                 print(p, "that is", f"{p/M}*M,", f"M = {M}")
-#                 if p > best[2]:
-#                     best = S, P, p
-#                 found = True
-#                 break
+        values: List[int] = []
+        found = False
+        for c in range(
+            shift, M * M + 2 + shift
+        ):  # assuming no greater than this value period can be found
+            v = c_a_to_P(c)
+            values.append(v)
+            p = len(values) // 2
+            if len(values) % 2 == 0 and values[:p] == values[p:]:
+                print(p, "that is", f"{p/M}*M,", f"M = {M}")
+                if p > best[2]:
+                    best = S, P, p
+                found = True
+                break
 
-#         if not found:
-#             print("No period found")
+        if not found:
+            print("No period found")
 
-# if best[0] != -1:
-#     S, P, p = best
-#     M = 2**S
-#     print(
-#         f"Best found: (S, P) = ({S}, {P}) with period = {p}",
-#         "that is",
-#         f"{p/M}*M,",
-#         f"M = {M}",
-#     )
+if best[0] != -1:
+    S, P, p = best
+    M = 2**S
+    print(
+        f"Best found: (S, P) = ({S}, {P}) with period = {p}",
+        "that is",
+        f"{p/M}*M,",
+        f"M = {M}",
+    )
 
 # >>>>
 
