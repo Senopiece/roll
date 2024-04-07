@@ -1,14 +1,32 @@
+from typing import Any
 from cyclic import cmul
 
-S = 128  # bit length
 
+class G:
+    S = 128  # global bit length
+    _n: int
 
-def G(x: int):
-    return cmul(x, x, S)
+    def __init__(self, x: int) -> None:
+        self._n = cmul(x, x, self.S)
 
+    @classmethod
+    def _raw(cls, n: int):
+        obj = cls.__new__(cls)
+        obj._n = n
+        return obj
 
-def mulG(x: int, y: int):
-    return cmul(x, y, S)
+    def __mul__(self, other: Any):
+        if not isinstance(other, G):
+            raise TypeError()
+        return G._raw(cmul(self._n, other._n, self.S))
+
+    def __eq__(self, other: Any):
+        if not isinstance(other, G):
+            raise TypeError()
+        return self._n == other._n
+
+    def __repr__(self) -> str:
+        return str(self._n)
 
 
 # This sign approach requires
@@ -32,8 +50,8 @@ def sign(h: int, k: int):
 G2 = G(2)
 
 
-def verify(h: int, Gs: int, Gk: int):
-    return mulG(Gs, G2) == mulG(Gk, G(h))
+def verify(h: int, Gs: G, Gk: G):
+    return Gs * G2 == Gk * G(h)
 
 
 if __name__ == "__main__":
@@ -42,7 +60,7 @@ if __name__ == "__main__":
     k = 235666
     Gk = G(k)
 
-    Gs = sign(h, k)
+    Gs = sign(567, k)
 
     print(verify(h, Gs, Gk))
 
