@@ -3,7 +3,7 @@ from cyclic import cmul
 
 
 class G:
-    S = 128  # global bit length
+    S = 32  # global bit length
     _n: int
 
     def __init__(self, x: int) -> None:
@@ -33,35 +33,33 @@ class G:
 # - No division operation to be feasible on the cipher (e.g. no Gx / a)
 # - A underlying periodicity to be either
 #   hard to find and hence unknown or just with no period at all.
-#   So that multiplecative inverse cannot be used to simulate division
+#   Or a even period, so that 2 cannot have multiplicative inverse.
+#   So that multiplecative inverse cannot be used to simulate division.
 
-# h - message hash (S/2 bits recommended)
-# k - signer private key (S/2 bits recommended)
-# Gk - signer public key (S bits)
+# h - message hash (S bits)
+# k - signer private key (S bits)
+# G2k - signer public key (S bits)
 # Gs - sign (S bits)
-# Hovewer can sign only iff k*h < 2^S, so it's better to have S/2 private key and message hash
 
 
 def sign(h: int, k: int):
-    assert k % 2 == 0
-    return G(h * k // 2)
+    return G(h) * G(k)
 
 
 G2 = G(2)
 
 
-def verify(h: int, Gs: G, Gk: G):
-    return Gs * G2 == Gk * G(h)
+def verify(h: int, Gs: G, G2k: G):
+    return Gs * G2 == G2k * G(h)
 
 
 if __name__ == "__main__":
-    h = 324235
+    h = 32423532434
 
-    k = 235666
-    Gk = G(k)
+    k = 23566623423
+    G2k = G2 * G(k)
+    Gs = sign(h, k)
 
-    Gs = sign(567, k)
-
-    print(verify(h, Gs, Gk))
+    print(verify(h, Gs, G2k))
 
 # TODO: check vulanabilities
