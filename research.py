@@ -37,7 +37,7 @@ def a_mul_a(a: int):
     return mul(a, a)
 
 
-# best so far found period: M(M-1) ~ M^2
+# best so far found period: M*(M-1) ~ M^2
 def c_a_mul_a(a: int):
     return cmul(a, a, S)
 
@@ -110,16 +110,49 @@ def c_a_to_a(a: int):
     return res
 
 
+# check rules
+
+S = 6
+M = 2**S
+x = 2
+y = 7
+
+Ex = c_a_mul_a(x)
+Ey = c_a_mul_a(y)
+
+res = x * y  # TODO: find f(x, y) for c_a_mul_a
+
+Eres = c_a_mul_a(res)
+
+print(Eres - cmul(Ex, Ey))
+
+# check period
+
+# S = 6
+# M = 2**S
+# print("M:", M)
+# for p in range(M, M * M):
+#     for x in range(2, p):
+#         try:
+#             x_1 = pow(x, -1, p)
+#         except:
+#             continue
+#         r = mul(a_mul_a(x), a_mul_a(x_1))
+#         if r != 1:
+#             break
+#     else:
+#         print(p)
+
 # just visualize
 # S = 5
-M = 2 * 3 * 5
-a = ["-"] * M
-P = 2
-for c in range(M):
-    v = P_mul_a(c)
-    a = ["-"] * M
-    a[v] = "x"
-    print(" ".join(a), "<" if c % M == 0 else "", v)
+# M = 2 * 3 * 5
+# a = ["-"] * M
+# P = 2
+# for c in range(M):
+#     v = P_mul_a(c)
+#     a = ["-"] * M
+#     a[v] = "x"
+#     print(" ".join(a), "<" if c % M == 0 else "", v)
 
 # >>>>
 
@@ -136,7 +169,7 @@ for c in range(M):
 #         for c in range(
 #             shift, M**M + 4 + shift
 #         ):  # assuming no greater than this value period can be found
-#             v = c_P_mul_a(c)
+#             v = a_to_a(c)
 #             values.append(v)
 #             p = len(values) // 2
 #             if len(values) % 2 == 0 and values[:p] == values[p:]:
@@ -171,7 +204,7 @@ for c in range(M):
 #     values: List[int] = []
 #     found = False
 #     for c in range(M * M * M * 2):  # assuming no greater than M^3 period can be found
-#         v = c_P_to_a(c)
+#         v = c_a_mul_a(c)
 #         values.append(v)
 #         if (
 #             len(values) % 2 == 0
