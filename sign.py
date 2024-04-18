@@ -2,31 +2,32 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 # Defining
-# h - message hash (S bits) - is divisible by hash_multiple
+# h - message hash (S bits)
 # Ek - signer private key (S bits)
-# Epk = E*key_multiplier*k - signer public key (S bits)
+# Epk = Ek*key_mul - signer public key (S bits)
 # Es - sign (S bits)
 
 # This sign approach requires
 # - A bounded space E where E(x) is easy, but the opposite is not
 #   - hence no comparison to be feasible in E
-# - A commutative and associative multiplication by a number to be defined in E
-#   > that actually does not really need to work as a multiplication, but just to be commutative and associative
-#   > there is a f(x, y) such that E(f(x, y)) = E(x)*y, but this f is not necessarily x*y - it can be x+y or any other
-# - No division to be feasible in E
-# - No inverse elements to be feasible in E, or at least protect hash and key_multiplier from inversion
+# - A commutative and associative addition by a number to be defined in E
+#   > that actually does not really need to work as a addition, but just to be commutative and associative
+# - No subtraction and division to be feasible in E
+# - No negative and inverse elements to be feasible in E
 #   > A underlying periodicity to be either
 #     hard to find and hence unknown or just with no period at all.
-#   > Or, if in E(f(x, y)) = E(x)*y, f(x, y) = x*y (mod m), m must be a multiple of key_multiplier and hash_multiple.
-# - Hash must not be divisible by key_multiplier
+# - (optionally) key_mul*x to produce well span over the space
+#   > for regular multiplication by modulo this means that key_mul is mutual prime to the hidden modulo
+#     so that maybe it can be proven without knowing the actual period
 
 
 class E(ABC):
     @abstractmethod
+    def __add__(self, other: Any) -> "E":
+        raise NotImplementedError()
+
+    @abstractmethod
     def __mul__(self, other: int) -> "E":
-        # needs to be commutative and associative
-        # and to disallow either any inverse or
-        # ensure no inverse just for some categories (e.g. no inverse for hash and key_multiplier)
         raise NotImplementedError()
 
     @abstractmethod
@@ -34,10 +35,12 @@ class E(ABC):
         raise NotImplementedError()
 
 
-class E32CSqr(E):
+# this thing is just for example - it has well calculable period, but other properties are ok
+class E32Exp(E):
     S = 32  # global bit length
     M = pow(S, 2)
-    # period is M // 2
+    G = 11  # generator point - aka E(0)
+    VS = 1  # variation shift - tweaking it makes another group but with the same period
     _n: int
 
     @classmethod
@@ -45,7 +48,7 @@ class E32CSqr(E):
         return (a * b) % cls.M
 
     def __init__(self, x: int) -> None:
-        self._n = self._mul(x, x)
+        self._n = self.VS * pow(self.G, x, self.M)
 
     @classmethod
     def _raw(cls, n: int):
@@ -53,23 +56,21 @@ class E32CSqr(E):
         obj._n = n
         return obj
 
-    def __mul__(self, other: int):
-        # Although with this implementation multiplication directly in E is defined,
-        # but the most general interface allows support systems where it is not defined
-        #   > e.g. discrete exponentiation has only defined addition in E,
-        #     so that only multiplication by a raw number can be feasible
-        # so that we can adopt to the most general interface
-        # by just moving the raw number to E before multiplication
-        return E32CSqr._raw(
-            # perform mul in E
+    def __add__(self, other: Any):
+        if not isinstance(other, E32Exp):
+            raise TypeError()
+        return E32Exp._raw(
             self._mul(
                 self._n,
-                self._mul(other, other),  # mv raw number to E
+                other._n,
             )
         )
 
+    def __mul__(self, n: int):
+        return E32Exp._raw(pow(self._n, n, self.M))
+
     def __eq__(self, other: Any):
-        if not isinstance(other, E32CSqr):
+        if not isinstance(other, E32Exp):
             raise TypeError()
         return self._n == other._n
 
@@ -77,37 +78,23 @@ class E32CSqr(E):
         return str(self._n)
 
 
-def normalized_hash(h: int):
-    # make hash not divisible by four but divisible by two
-    # so that hash remains uninvertable still not devisable by key_multiplier
-    # reminder - correction
-    # 0        - +2
-    # 1        - +1
-    # 2        - 0
-    # 3        - -1
-    reminder = h % 4
-    correction = 2 - reminder
-    return h + correction
+KEY_MUL = 2
 
 
 def sign(h: int, Ek: E):
-    h = normalized_hash(h)
-    return Ek * h
+    return Ek + E32Exp(h)
 
 
 def verify(h: int, Es: E, Epk: E):
-    h = normalized_hash(h)
-    # (Ek * h) * 4 == (Ek * 4) * h requires commutability and associativity
-    return Es * 4 == Epk * h
+    # (k + h) * KEY_MUL == k*KEY_MUL + h*KEY_MUL requires commutability and associativity
+    return Es * KEY_MUL == Epk + E32Exp(h) * KEY_MUL
 
 
 if __name__ == "__main__":
-    h = 32423532434
+    h = 324235324349912
 
-    Ek = E32CSqr(324325)
-    # assert period of E32CSqr is a power of 2 - true
-    # here we use key_multiplier = 4
-    Epk = Ek * 4
+    Ek = E32Exp(7794992043)  # private key
+    Epk = Ek * KEY_MUL  # public key
     Es = sign(h, Ek)
 
     print(verify(h, Es, Epk))
