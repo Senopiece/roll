@@ -35,8 +35,8 @@ def cdiv(a: int, b: int, bit_length: int = 5):
     return cmul(a, pow(b, -1, period))
 
 
-# TODO: find a way to find it's period (recall how it's done in a regular case with euler's theorem)
-# TODO: find ways to solve such discrete log (both quantum and classical) is it the same as regular discrete log?
+# it definitely has no period it's emulating something that is not addition by modulus
+# TODO: find ways to solve such discrete log (both quantum and classical)
 def cpow(a: int, b: int, bit_length: int = 5):
     res = 1
     for bit in bin(b)[2:]:

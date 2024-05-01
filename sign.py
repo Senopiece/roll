@@ -48,10 +48,10 @@ class E32Exp(E):
         return (a * b) % cls.M
 
     def __init__(self, x: int) -> None:
-        self._n = self.VS * pow(self.G, x, self.M)
+        self._n = (self.VS * pow(self.G, x, self.M)) % self.M
 
     @classmethod
-    def _raw(cls, n: int):
+    def raw(cls, n: int):
         obj = cls.__new__(cls)
         obj._n = n
         return obj
@@ -59,7 +59,7 @@ class E32Exp(E):
     def __add__(self, other: Any):
         if not isinstance(other, E32Exp):
             raise TypeError()
-        return E32Exp._raw(
+        return E32Exp.raw(
             self._mul(
                 self._n,
                 other._n,
@@ -67,7 +67,7 @@ class E32Exp(E):
         )
 
     def __mul__(self, n: int):
-        return E32Exp._raw(pow(self._n, n, self.M))
+        return E32Exp.raw(pow(self._n, n, self.M))
 
     def __eq__(self, other: Any):
         if not isinstance(other, E32Exp):
@@ -81,13 +81,21 @@ class E32Exp(E):
 KEY_MUL = 2
 
 
+def f(h: int) -> E32Exp:
+    # return E(h) # is not safe since with it attacker has a pretty decent chance
+    #               to falsify a sign knowing at least one valid sign
+    #               falsification: E(k) + E(h2) = Es1 + E(d) = (E(k) + E(h1)) + E(d), d = h2 - h1
+    #                              if h2 > h1 -> E(d) is easy to calculate
+    return E32Exp.raw(h)  # this may be out of subgroup - seems to be ok, but is it?
+
+
 def sign(h: int, Ek: E):
-    return Ek + E32Exp(h)
+    return Ek + f(h)
 
 
 def verify(h: int, Es: E, Epk: E):
-    # (k + h) * KEY_MUL == k*KEY_MUL + h*KEY_MUL requires commutability and associativity
-    return Es * KEY_MUL == Epk + E32Exp(h) * KEY_MUL
+    # (k + f(h)) * KEY_MUL == k*KEY_MUL + f(h)*KEY_MUL requires commutability and associativity
+    return Es * KEY_MUL == Epk + f(h) * KEY_MUL
 
 
 if __name__ == "__main__":

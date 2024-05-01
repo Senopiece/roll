@@ -99,7 +99,8 @@ def a_to_a(a: int):
     return res
 
 
-# best so far found period: M(M/2-1) ~ M^2
+# it definitely has no period it's emulating something that is not addition by modulus
+# TODO: find ways to solve such discrete sqrt (both quantum and classical)
 def c_a_to_a(a: int):
     # returns cyclic a^a
     res = 1
@@ -110,7 +111,8 @@ def c_a_to_a(a: int):
     return res
 
 
-# check rules
+# Check rules
+# Checking the real period: f(p) = 0, f(x + p) = 0
 
 S = 6
 M = 2**S
@@ -120,13 +122,16 @@ y = 7
 Ex = c_a_mul_a(x)
 Ey = c_a_mul_a(y)
 
-res = x * y  # TODO: find f(x, y) for c_a_mul_a
+res = (
+    x * y
+)  # TODO: find f(x, y) for c_a_mul_a this f(x, y) = x*y % p is definitely not a case
 
 Eres = c_a_mul_a(res)
 
 print(Eres - cmul(Ex, Ey))
 
 # check period
+# NOTE: when applying to c_* functions you can see a fake period
 
 # S = 6
 # M = 2**S
@@ -157,6 +162,7 @@ print(Eres - cmul(Ex, Ey))
 # >>>>
 
 # search for the best period when P is also iterable
+# NOTE: when applying to c_* functions finds a fake period
 # best = (-1, -1, -1)
 # shift = 3
 # for S in range(5, 8):
@@ -195,6 +201,7 @@ print(Eres - cmul(Ex, Ey))
 # >>>>
 
 # search for the best period when P is not iterable
+# NOTE: when applying to c_* functions finds a fake period
 # P = 3
 # best = (-1, -1)
 # for S in range(4, 10):
