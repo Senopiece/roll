@@ -41,7 +41,7 @@ class CSqr:
         return str(self._n)
 
 
-KEY_MUL = CSqr(2)
+KEY_MUL = CSqr.raw(2)
 
 
 def f(h: int) -> CSqr:
