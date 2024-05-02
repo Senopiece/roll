@@ -30,11 +30,6 @@ def cmul(a: int, b: int, bit_length: int = 5):
     return res
 
 
-def cdiv(a: int, b: int, bit_length: int = 5):
-    period = (1 << bit_length) - 1
-    return cmul(a, pow(b, -1, period))
-
-
 # it definitely has no period it's emulating something that is not addition by modulus
 # TODO: find ways to solve such discrete log (both quantum and classical)
 def cpow(a: int, b: int, bit_length: int = 5):
