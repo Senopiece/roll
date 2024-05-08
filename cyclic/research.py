@@ -1,6 +1,6 @@
 from typing import List
 
-from cyclic import cadd, cmul
+from cyclic.cyclic import cadd, cmul
 
 
 def add(a: int, b: int):

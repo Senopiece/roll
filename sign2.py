@@ -1,7 +1,7 @@
 # refer to sign.py for the idea
 
 from typing import Any
-from cyclic import cmul
+from cyclic.cyclic import cmul
 
 
 # TODO: find approaches to hack it

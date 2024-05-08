@@ -1,0 +1,1 @@
+Initially this repo was for researching cyclic addition, but further I noticed how it can be used in cryptography and made some abstract cryptography stuff in here not necessarily relying on the cyclic addition I researched here. Further I decided to make this repo mainly crypto and lay cyclic add as just a instance of the crypto schemes.
