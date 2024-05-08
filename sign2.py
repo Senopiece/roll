@@ -41,7 +41,7 @@ class CSqr:
         return str(self._n)
 
 
-KEY_MUL = CSqr.raw(2)
+KEY_MUL = CSqr.raw((pow(2, CSqr.S) // 2) + 1)  # maybe CSqr.raw(2) is enough?
 
 
 def f(h: int) -> CSqr:
@@ -71,7 +71,7 @@ def verify(h: int, Es: CSqr, Epk: CSqr):
 if __name__ == "__main__":
     h = 1123568764323
 
-    Ek = CSqr(25823245)  # private key
+    Ek = CSqr.raw(25823245)  # private key
     Epk = Ek * KEY_MUL  # public key
     Es = sign(h, Ek)
 
