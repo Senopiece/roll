@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from matrix import Mat, fast_matrix_pow, matrix_mod_mul
+
 # Defining
 # h - message hash (S bits)
 # Ek - signer private key (S bits)
@@ -10,8 +12,7 @@ from typing import Any
 # This sign approach requires
 # - A bounded space E where E(x) is easy, but the opposite is not
 #   - hence no comparison to be feasible in E
-# - A commutative and associative addition by a number to be defined in E
-#   > that actually does not really need to work as a addition, but just to be commutative and associative
+# - (a + b) * c = a*c + b*c to hold true in E
 # - No subtraction and division to be feasible in E
 # - No negative and inverse elements to be feasible in E
 #   > A underlying periodicity to be either
@@ -35,58 +36,62 @@ class E(ABC):
         raise NotImplementedError()
 
 
-# this thing is just for example - it has well calculable period, but other properties are ok
-class E32Exp(E):
-    S = 32  # global bit length
-    M = pow(S, 2)
-    G = 11  # generator point - aka E(0)
-    VS = 1  # variation shift - tweaking it makes another group but with the same period
-    _n: int
-
-    @classmethod
-    def _mul(cls, a: int, b: int):
-        return (a * b) % cls.M
+# computing the periodicity of this group is known as pisano period
+# for a prime M the fastest known way to compute it is O(M)
+# so it's suitable because it's underlying periodicity is hard to find and hence unknown
+class FibMat(E):
+    S = 127  # global bit length
+    M = pow(S, 2) - 1
+    _data: Mat
 
     def __init__(self, x: int) -> None:
-        self._n = (self.VS * pow(self.G, x, self.M)) % self.M
+        F1: Mat = [[0, 1], [1, 1]]
+        self._data = fast_matrix_pow(F1, x, self.M)
 
     @classmethod
-    def raw(cls, n: int):
+    def raw(cls, data: Mat):
         obj = cls.__new__(cls)
-        obj._n = n
+        obj._data = data
         return obj
 
     def __add__(self, other: Any):
-        if not isinstance(other, E32Exp):
+        if not isinstance(other, FibMat):
             raise TypeError()
-        return E32Exp.raw(
-            self._mul(
-                self._n,
-                other._n,
+        return FibMat.raw(
+            matrix_mod_mul(
+                self._data,
+                other._data,
+                self.M,
             )
         )
 
     def __mul__(self, n: int):
-        return E32Exp.raw(pow(self._n, n, self.M))
+        return FibMat.raw(fast_matrix_pow(self._data, n, self.M))
 
     def __eq__(self, other: Any):
-        if not isinstance(other, E32Exp):
+        if not isinstance(other, FibMat):
             raise TypeError()
-        return self._n == other._n
+        return self._data == other._data
 
     def __repr__(self) -> str:
-        return str(self._n)
+        return str(self._data)
 
 
 KEY_MUL = 2
 
 
-def f(h: int) -> E32Exp:
+def f(h: int) -> FibMat:
     # return E(h) # is not safe since with it attacker has a pretty decent chance
     #               to falsify a sign knowing at least one valid sign
     #               falsification: E(k) + E(h2) = Es1 + E(d) = (E(k) + E(h1)) + E(d), d = h2 - h1
     #                              if h2 > h1 -> E(d) is easy to calculate
-    return E32Exp.raw(h)  # this may be out of subgroup - seems to be ok, but is it?
+
+    # TODO: research mb not stick to fib and allow to set hash to raw data
+    #       that is out of the subgroup, but seems to be ok with it,
+    #       moreover it also seems that even known pisano period will not help to hack if hash is used in raw
+    # return FibMat.raw([[hash(h+1) % FibMat.M, h], [h, hash(h+2) % FibMat.M]])
+
+    return FibMat(h) * h  # looks to be ok, but maybe there is a better way
 
 
 def sign(h: int, Ek: E):
@@ -94,14 +99,14 @@ def sign(h: int, Ek: E):
 
 
 def verify(h: int, Es: E, Epk: E):
-    # (k + f(h)) * KEY_MUL == k*KEY_MUL + f(h)*KEY_MUL requires commutability and associativity
+    # (k + f(h)) * KEY_MUL == k*KEY_MUL + f(h)*KEY_MUL
     return Es * KEY_MUL == Epk + f(h) * KEY_MUL
 
 
 if __name__ == "__main__":
     h = 324235324349912
 
-    Ek = E32Exp(7794992043)  # private key
+    Ek = FibMat(7794992043)  # private key
     Epk = Ek * KEY_MUL  # public key
     Es = sign(h, Ek)
 
