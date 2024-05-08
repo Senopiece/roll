@@ -1,8 +1,14 @@
 # proof that Ea > Eb
-# requires E like from sign.py
+
+# this thing can be used for example in blockchain with hidden balances:
+#  https://github.com/Senopiece/balance_cipher/blob/main/balance_cipher.py
 
 
 from sign import FibMat
+
+# requires E like from sign.py
+# without E like from sign.py the proof would look like
+#  https://github.com/Senopiece/balance_cipher/blob/main/comparison_proofs.py
 
 
 def proof(a: int, b: int):
