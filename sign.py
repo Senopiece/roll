@@ -45,6 +45,7 @@ class FibMat(E):
     _data: Mat
 
     def __init__(self, x: int) -> None:
+        assert x > 0
         F1: Mat = [[0, 1], [1, 1]]
         self._data = fast_matrix_pow(F1, x, self.M)
 
